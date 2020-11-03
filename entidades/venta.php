@@ -153,13 +153,11 @@
         public function obtenerTodos(){
             $aVentas = null;
             $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
-            $sql = "SELECT idventa, 
-                            fecha, 
-                            cantidad, 
-                            preciounitario, 
+            $sql = "SELECT  fecha, 
+                            cantidad,
                             total, 
-                            fk_idcliente,
-                            fk_idproducto
+                            (SELECT nombre FROM clientes WHERE idcliente = fk_idcliente) AS cliente,
+                            (SELECT nombre FROM productos WHERE idproducto = fk_idproducto) AS producto
                     FROM ventas;";
             if (!$resultado = $mysqli->query($sql)) {
                 printf("Error en query: %s\n", $mysqli->error . " " . $sql);
@@ -169,13 +167,11 @@
             if($resultado){
                 while ($fila = $resultado->fetch_assoc()) {
                     $obj = new Venta();
-                    $obj->idVenta = $fila["idventa"];
                     $obj->fecha = $fila["fecha"];
                     $obj->cantidad = $fila["cantidad"];
-                    $obj->precioUnitario = $fila["preciounitario"];
                     $obj->total = $fila["total"];
-                    $obj->fkCliente = $fila["fk_idcliente"];
-                    $obj->fkProducto = $fila["fk_idproducto"];
+                    $obj->cliente = $fila["cliente"];
+                    $obj->producto = $fila["producto"];
                     $aVentas[] = $obj;
     
                 }

@@ -69,22 +69,12 @@
                                 $aVenta = $venta->obtenerTodos();
 
                                 if (isset($aVenta)) {
-                                    $producto = new Producto();
-                                    $cliente = new Cliente();
-
                                     foreach ($aVenta as $venta) {
                                         echo "<tr>";
                                         echo "<td>".date_format(date_create($venta->fecha), "d-m-Y | H:i:s")."</td>";
                                         echo "<td>$venta->cantidad</td>";
-
-                                        $producto->idProducto = $venta->fkProducto;
-                                        $producto->obtenerPorId();
-                                        echo "<td>$producto->nombre</td>";
-
-                                        $cliente->idCliente = $venta->fkCliente;
-                                        $cliente->obtenerPorId();
-                                        echo "<td>$cliente->nombre</td>";
-
+                                        echo "<td>$venta->producto</td>";
+                                        echo "<td>$venta->cliente</td>";
                                         echo "<td>".number_format($venta->total, 2, ",", ".")."</td>";
                                         echo "<td class=text-center><a href='venta-formulario.php?id=" .$venta->idVenta. "'><i class='fas fa-search'></i></a></td>";
                                         echo "</tr>";
