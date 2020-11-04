@@ -178,6 +178,37 @@
             }
         }
 
+        public function obtenerFacturacionMensual($mes) {
+            $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
+            $sql = "SELECT  SUM(total) AS factMes
+                    FROM ventas
+                    WHERE (SELECT EXTRACT(MONTH FROM fecha)) = $mes
+                    AND (SELECT EXTRACT(YEAR FROM fecha)) = (SELECT EXTRACT(YEAR FROM NOW()));";
+            if (!$resultado = $mysqli->query($sql)) {
+                printf("Error en query: %s\n", $mysqli->error . " " . $sql);
+            }
+            $resultado = $mysqli->query($sql);
+
+            if($fila = $resultado->fetch_assoc()){
+                return $fila["factMes"];
+            }
+        }
+
+        public function obtenerFacturacionAnual($anio) {
+            $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
+            $sql = "SELECT  SUM(total) AS factAnual
+                    FROM ventas
+                    WHERE (SELECT EXTRACT(YEAR FROM fecha)) = $anio;";
+            if (!$resultado = $mysqli->query($sql)) {
+                printf("Error en query: %s\n", $mysqli->error . " " . $sql);
+            }
+            $resultado = $mysqli->query($sql);
+
+            if($fila = $resultado->fetch_assoc()){
+                return $fila["factAnual"];
+            }
+        }
+
     }
 
 ?>
