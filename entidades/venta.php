@@ -152,7 +152,8 @@
         public function obtenerTodos(){
             $aVentas = null;
             $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
-            $sql = "SELECT  fecha, 
+            $sql = "SELECT  idventa,
+                            fecha, 
                             cantidad,
                             total, 
                             (SELECT nombre FROM clientes WHERE idcliente = fk_idcliente) AS cliente,
@@ -166,6 +167,7 @@
             if($resultado){
                 while ($fila = $resultado->fetch_assoc()) {
                     $obj = new Venta();
+                    $obj->idVenta = $fila["idventa"];
                     $obj->fecha = $fila["fecha"];
                     $obj->cantidad = $fila["cantidad"];
                     $obj->total = $fila["total"];
