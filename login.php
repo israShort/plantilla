@@ -1,13 +1,18 @@
 <?php
   session_start();
+  include_once("config.php");
+  include_once("entidades/usuario.php");
 
   if ($_POST) {
     $usuario = trim($_POST["inputEmail"]);
     $password = trim($_POST["inputPassword"]);
-    $passwordEncripted = password_hash("admin123", PASSWORD_DEFAULT);
+    
+    $user = new Usuario();
+    $user->usuario = $usuario;
+    $user->obtenerPorUsuario();
 
-    if ($usuario == "admin" && password_verify($password, $passwordEncripted)) {
-      $_SESSION["user"] = "Israel Short";
+    if (($user->idUsuario != "") && ($user->verificarClave($password, $user->clave))) {
+      $_SESSION["user"] = $user->nombre." ".$user->apellido;
       header("Location: index.php");
     } else {
       $msg = "Usuario o clave incorrecto";
@@ -18,7 +23,7 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
 
