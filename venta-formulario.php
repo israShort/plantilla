@@ -45,22 +45,31 @@
         } else {
             $producto = new Producto();
             $producto->idProducto = $venta->fkProducto;
-            $producto->obtenerPorId();
-            
-            if (($producto->cantidad >= $venta->cantidad) && ($venta->cantidad > 0)) {
-                $venta->insertar();
-                if ($venta->accion) {
-                    $producto->cantidad -= $venta->cantidad;
-                    $producto->actualizar();
-                    $msg = "La venta se insertó de manera exitosa.";
+            if ($producto->idProducto != "") {
+                $producto->obtenerPorId();
+                
+                if (($producto->cantidad >= $venta->cantidad) && ($venta->cantidad > 0)) {
+                    $venta->insertar();
+                    if ($venta->accion) {
+                        $producto->cantidad -= $venta->cantidad;
+                        $producto->actualizar();
+                        $msg = "La venta se insertó de manera exitosa.";
+                    } else {
+                        $msg = $venta->msg;
+                    }
                 } else {
-                    $msg = $venta->msg;
+                    print_r("Error");
                 }
-            } else {
-                print_r("Error");
             }
         }
-    } 
+    }
+
+    if (isset($_GET["do"]) && ($_GET["do"] == "precioProducto")) {
+        $articulo = new Producto();
+        $articulo->idProducto = $_GET["id"];
+        $articulo->obtenerPorId();
+        echo json_encode($articulo->precio);exit;
+    }
 
 ?>
 
@@ -89,7 +98,6 @@
 </head>
 
 <body id="page-top">
-<form action="" method="POST">
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -108,7 +116,7 @@
                     <div class="col-12">
                         <a href="ventas-listado.php" class="btn btn-primary m-2">Listado</a>
                         <a href="venta-formulario.php" class="btn btn-primary m-2">Nuevo</a>
-                        <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar">Guardar</button>
+                        <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar" onclick="guardar();">Guardar</button>
                         <button type="submit" class="btn btn-danger m-2" id="btnBorrar" name="btnBorrar">Borrar</button>
                     </div>
                     <h6 class="alert <?php echo $venta->accion ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
@@ -123,69 +131,70 @@
 
                 ?>
 
-                <div class="row mt-3">
-                    <div class="col-6 form-group">
-                        <label for="txtFecha">Fecha:</label>
-                        <input type="date" required class="form-control" name="txtFecha" id="txtFecha" value="<?php echo isset($_GET["id"]) ? date("yy-m-d", strtotime($venta->fecha)) : date("yy-m-d"); ?>">
-                    </div>
+                <form id="formulario" action="" method="POST">
+                    <div class="row mt-3">
+                        <div class="col-6 form-group">
+                            <label for="txtFecha">Fecha:</label>
+                            <input type="date" required class="form-control" name="txtFecha" id="txtFecha" value="<?php echo isset($_GET["id"]) ? date("yy-m-d", strtotime($venta->fecha)) : date("yy-m-d"); ?>">
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtHora">Hora:</label>
-                        <input type="time" required class="form-control" name="txtHora" id="txtHora" value="<?php echo isset($_GET["id"]) ? date("H:i",strtotime($venta->fecha)) : date("H:i"); ?>">
-                    </div>
+                        <div class="col-6 form-group">
+                            <label for="txtHora">Hora:</label>
+                            <input type="time" required class="form-control" name="txtHora" id="txtHora" value="<?php echo isset($_GET["id"]) ? date("H:i",strtotime($venta->fecha)) : date("H:i"); ?>">
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtCliente">Cliente:</label>
-                        <select name="lstCliente" id="lstCliente" class="form-control" required>
-                            <?php
-                                $c = new Cliente();
-                                $aClientes = $c->obtenerTodos();
-                            ?>
-                            <option value="<?php echo isset($_GET["id"]) ? $venta->fkCliente : ""; ?>" <?php echo isset($_GET["id"]) ? "selected" : "selected disabled" ; ?>><?php echo isset($_GET["id"]) ? $venta->cliente : "Seleccionar"; ?></option>
-                            <?php
-                                foreach ($aClientes as $cliente) {
-                                    if (!($venta->cliente === $cliente->nombre)) {
-                                        echo "<option value='$cliente->idCliente'>$cliente->nombre</option>\n";
+                        <div class="col-6 form-group">
+                            <label for="txtCliente">Cliente:</label>
+                            <select name="lstCliente" id="lstCliente" class="form-control" required>
+                                <?php
+                                    $c = new Cliente();
+                                    $aClientes = $c->obtenerTodos();
+                                ?>
+                                <option value="<?php echo isset($_GET["id"]) ? $venta->fkCliente : ""; ?>" <?php echo isset($_GET["id"]) ? "selected" : "selected disabled" ; ?>><?php echo isset($_GET["id"]) ? $venta->cliente : "Seleccionar"; ?></option>
+                                <?php
+                                    foreach ($aClientes as $cliente) {
+                                        if (!($venta->cliente === $cliente->nombre)) {
+                                            echo "<option value='$cliente->idCliente'>$cliente->nombre</option>\n";
+                                        }
                                     }
-                                }
-                            ?>
-                        </select>
-                    </div>
+                                ?>
+                            </select>
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtProducto">Producto:</label>
-                        <select name="lstTipoProducto" id="lstTipoProducto" class="form-control selectpicker" data-live-search="true" required>
-                            <?php
-                                $prod = new Producto();
-                                $aProductos = $prod->obtenerTodos();
-                            ?>
-                            <option value="<?php echo isset($_GET["id"]) ? $venta->fkProducto : ""; ?>" <?php echo isset($_GET["id"]) ? "selected" : "selected disabled" ; ?>><?php echo isset($_GET["id"]) ? $venta->producto : "Seleccionar"; ?></option>
-                            <?php
-                                foreach ($aProductos as $producto) {
-                                    if (!($venta->producto === $producto->nombre)) {
-                                        echo "<option value='$producto->idProducto'>$producto->nombre</option>\n";
+                        <div class="col-6 form-group">
+                            <label for="txtProducto">Producto:</label>
+                            <select onchange="traerDatosProducto();" name="lstTipoProducto" id="lstTipoProducto" class="form-control selectpicker" data-live-search="true" required>
+                                <?php
+                                    $prod = new Producto();
+                                    $aProductos = $prod->obtenerTodos();
+                                ?>
+                                <option value="<?php echo isset($_GET["id"]) ? $venta->fkProducto : ""; ?>" <?php echo isset($_GET["id"]) ? "selected" : "selected disabled" ; ?>><?php echo isset($_GET["id"]) ? $venta->producto : "Seleccionar"; ?></option>
+                                <?php
+                                    foreach ($aProductos as $producto) {
+                                        if (!($venta->producto === $producto->nombre)) {
+                                            echo "<option value='$producto->idProducto'>$producto->nombre</option>\n";
+                                        }
                                     }
-                                }
-                            ?>
-                        </select>
-                    </div>
+                                ?>
+                            </select>
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtPrecioUnit">Precio unitario:</label>
-                        <input type="text" required class="form-control" name="txtPrecioUnit" id="txtPrecioUnit" value="<?php echo isset($_GET["id"]) ? number_format($venta->precioUnitario, 2, ",", ".") : "0"; ?>">
-                    </div>
+                        <div class="col-6 form-group">
+                            <label for="txtPrecioUnit">Precio unitario:</label>
+                            <input type="text" required class="form-control" name="txtPrecioUnit" id="txtPrecioUnit" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->precioUnitario, 2, ",", ".") : "0"; ?>">
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtCantidad">Cantidad:</label>
-                        <input type="text" required class="form-control" name="txtCantidad" id="txtCantidad" value="<?php echo isset($_GET["id"]) ? $venta->cantidad : "0"; ?>">
-                    </div>
+                        <div class="col-6 form-group">
+                            <label for="txtCantidad">Cantidad:</label>
+                            <input onchange="calcularPrecioTotal();" type="number" min="0" required class="form-control" name="txtCantidad" id="txtCantidad" value="<?php echo isset($_GET["id"]) ? $venta->cantidad : "0"; ?>">
+                        </div>
 
-                    <div class="col-6 form-group">
-                        <label for="txtTotal">Total:</label>
-                        <input type="text" required class="form-control" name="txtTotal" id="txtTotal" value="<?php echo isset($_GET["id"]) ? number_format($venta->total, 2, ",", ".") : "0"; ?>">
+                        <div class="col-6 form-group">
+                            <label for="txtTotal">Total:</label>
+                            <input type="text" required class="form-control" name="txtTotal" id="txtTotal" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->total, 2, ",", ".") : "0"; ?>">
+                        </div>
                     </div>
-                </div>
-            
+                </form>
             </div>
 
             
@@ -246,7 +255,35 @@
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
-  </form>
 </body>
 
 </html>
+
+<script>                             
+
+    function guardar() {                                
+        $("#formulario").submit();
+    }
+
+    function traerDatosProducto() {
+        idProducto = $('#lstTipoProducto').val();
+        $.ajax({
+            type: "GET",
+            url: "venta-formulario.php?do=precioProducto",
+            data: {
+                id: idProducto
+            },
+            async: true,
+            dataType: "json",
+            success: function(data) {
+                $('#txtPrecioUnit').val(data);
+                calcularPrecioTotal();
+            }
+        });
+    }
+
+    function calcularPrecioTotal() {
+        $('#txtTotal').val($('#txtPrecioUnit').val() * $('#txtCantidad').val());
+    }
+
+</script>

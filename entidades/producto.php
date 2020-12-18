@@ -1,6 +1,8 @@
 <?php
 
-    class Producto {
+    include_once("entidades\mensajes.php");
+
+    class Producto extends Mensajes {
 
         private $idProducto;
         private $nombre;
@@ -10,11 +12,9 @@
         private $precio;
         private $descripcion;
         private $imagen;
-        private $accion;
-        private $msg;
 
         public function __construct() {
-            $this->accion = true;
+            $this->setAccion(true);
         }
 
         public function __get($atributo) {
@@ -57,8 +57,8 @@
             //Ejecuta la query
             if (!$mysqli->query($sql)) {
                 /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "Error insertando un nuevo producto.";
-                $this->accion = false;
+                $this->setMensaje("Error insertando un nuevo producto.");
+                $this->setAccion(false);
             }
             //Obtiene el id generado por la inserción
             $this->idProducto = $mysqli->insert_id;
@@ -87,8 +87,8 @@
               
             if (!$mysqli->query($sql)) {
                 /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "Error actualizando al cliente.";
-                $this->accion = false;
+                $this->setMensaje("Error actualizando al cliente.");
+                $this->setAccion(false);
             }
             $mysqli->close();
         }
@@ -99,8 +99,8 @@
             //Ejecuta la query
             if (!$mysqli->query($sql)) {
                 /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "No se ha podido eliminar el producto. Compruebe que el mismo no tenga ventas asociadas.";
-                $this->accion = false;
+                $this->setMensaje("No se ha podido eliminar el producto. Compruebe que el mismo no tenga ventas asociadas.");
+                $this->setAccion(false);
             }
             $mysqli->close();
         }

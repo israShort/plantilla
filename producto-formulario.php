@@ -35,23 +35,23 @@
             $producto->idProducto = $_GET["id"];
             if (isset($_POST["btnGuardar"])) {
                 $producto->actualizar();
-                $producto->accion ? $msg = "El producto se ha actualizado correctamente." : $msg = $producto->msg;
+                $producto->getAccion() ? $msg = "El producto se ha actualizado correctamente." : $msg = $producto->getMensaje();
             } else if (isset($_POST["btnBorrar"])) {
                 $producto->eliminar();
-                if ($producto->accion) {
+                if ($producto->getAccion()) {
                     if ($producto->imagen != "") {
                         unlink("files/$producto->imagen");
                     }
                     $msg = "El producto se ha eliminado correctamente.";
                     $_GET["id"] = null;
                 } else {
-                    $msg = $producto->msg;
+                    $msg = $producto->getMensaje();
                 }
             }
         } else {
             if ($producto->cantidad > 0) {
                 $producto->insertar();
-                $producto->accion ? $msg = "El producto se ha insertado correctamente." : $msg = $producto->msg;
+                $producto->getAccion() ? $msg = "El producto se ha insertado correctamente." : $msg = $producto->getMensaje();
             } else {
                 print_r("Error");
             }
@@ -109,7 +109,7 @@
                         <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar">Guardar</button>
                         <button type="submit" class="btn btn-danger m-2" id="btnBorrar" name="btnBorrar">Borrar</button>
                     </div>
-                    <h6 class="alert <?php echo $producto->accion ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
+                    <h6 class="alert <?php echo $producto->getAccion() ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
                 </div>
 
                 <?php

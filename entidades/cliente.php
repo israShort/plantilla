@@ -1,6 +1,8 @@
 <?php
 
-    class Cliente {
+    include_once("entidades\mensajes.php");
+
+    class Cliente extends Mensajes {
 
         private $idCliente;
         private $nombre;
@@ -8,11 +10,9 @@
         private $telefono;
         private $correo;
         private $fecha_nac;
-        private $accion;
-        private $msg;
 
         public function __construct() {
-            $this->accion = true;
+            $this->setAccion(true);
         }
 
         public function __get($atributo) {
@@ -49,15 +49,14 @@
                         '" . $this->correo ."', 
                         '" . $this->fecha_nac ."'
                     );";
-            //Ejecuta la query
+                    
             if (!$mysqli->query($sql)) {
-                /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "Error insertando al cliente '$this->nombre'.";
-                $this->accion = false;
+                $this->setMensaje("Error insertando al cliente '$this->nombre'.");
+                $this->setAccion(false);
             }
-            //Obtiene el id generado por la inserción
+            
             $this->idcliente = $mysqli->insert_id;
-            //Cierra la conexión
+            
             $mysqli->close();
         }
 
@@ -74,8 +73,8 @@
               
             if (!$mysqli->query($sql)) {
                 /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "Error actualizando al cliente '$this->nombre'.";
-                $this->accion = false;
+                $this->setMensaje("Error actualizando al cliente '$this->nombre'.");
+                $this->setAccion(false);
             }
             $mysqli->close();
         }
@@ -83,12 +82,12 @@
         public function eliminar(){
             $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
             $sql = "DELETE FROM clientes WHERE idcliente = " . $this->idCliente;
-            //Ejecuta la query
+            
             if (!$mysqli->query($sql)) {
-                /*printf("Error en query: %s\n", $mysqli->error . " " . $sql);*/
-                $this->msg = "Error eliminando al cliente '$this->nombre'. Compruebe que el mismo no tenga ventas asociadas.";
-                $this->accion = false;
+                $this->setMensaje("Error eliminando al cliente '$this->nombre'. Compruebe que el mismo no tenga ventas asociadas.");
+                $this->setAccion(false);
             }
+
             $mysqli->close();
         }
     

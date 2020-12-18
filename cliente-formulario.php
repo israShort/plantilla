@@ -1,7 +1,6 @@
 <?php
     
     include_once("config.php");
-    include_once("mensajes.php");
     include_once("entidades\cliente.php");
 
     $cliente = new Cliente();
@@ -11,16 +10,16 @@
         if (isset($_GET["id"]) && ($_GET["id"] >= 0)) {
             if (isset($_POST["btnGuardar"])) {
                 $cliente->actualizar();
-                $cliente->accion ? $msg = "El cliente se ha actualizado correctamente." : $msg = $cliente->msg;
+                $cliente->getAccion() ? $msg = "El cliente se ha actualizado correctamente." : $msg = $cliente->getMensaje();
             } else if (isset($_POST["btnBorrar"])) {
                 $cliente->eliminar();
-                $cliente->accion ? $msg = "El cliente se ha eliminado correctamente." : $msg = $cliente->msg;
+                $cliente->getAccion() ? $msg = "El cliente se ha eliminado correctamente." : $msg = $cliente->getMensaje();
                 /*header("Location: cliente-formulario.php");*/
                 $_GET["id"] = null;
             }
         } else {
             $cliente->insertar();
-            $cliente->accion ? $msg = "Cliente cargado con éxito." : $msg = $cliente->msg;
+            $cliente->getAccion() ? $msg = "Cliente cargado con éxito." : $msg = $cliente->getMensaje();
         }
     }
 
@@ -72,7 +71,7 @@
                         <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar">Guardar</button>
                         <button type="submit" class="btn btn-danger m-2" id="btnBorrar" name="btnBorrar">Borrar</button>
                     </div>
-                    <h6 class="alert <?php echo $cliente->accion ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
+                    <h6 class="alert <?php echo $cliente->getAccion() ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
                 </div>
 
                 <?php
