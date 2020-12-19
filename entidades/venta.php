@@ -73,18 +73,6 @@
 
             $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
 
-            /*comprobar que sea un valor numérico*/
-            if (!(strpos($this->precioUnitario, ",") === false)) {
-                $this->precioUnitario = str_replace(".", "", $this->precioUnitario);
-                $this->precioUnitario = str_replace(",", ".", $this->precioUnitario);
-            }
-            
-            /*comprobar que sea un valor numérico*/
-            if (!(strpos($this->total, ",") === false)) {
-                $this->total = str_replace(".", "", $this->total);
-                $this->total = str_replace(",", ".", $this->total);
-            }
-
             $sql = "UPDATE ventas SET
                     fk_idcliente = ".$this->fkCliente.",
                     fk_idproducto = ".$this->fkProducto.",

@@ -68,7 +68,12 @@
         $articulo = new Producto();
         $articulo->idProducto = $_GET["id"];
         $articulo->obtenerPorId();
-        echo json_encode($articulo->precio);exit;
+        $aDatos = array();
+        $aDatos = [
+            'precio' => $articulo->precio,
+            'stock' => $articulo->cantidad
+        ];
+        echo json_encode($aDatos);exit;
     }
 
 ?>
@@ -112,26 +117,26 @@
                     <h1 class="h3 mb-0 text-gray-800">Venta</h1>
                 </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <a href="ventas-listado.php" class="btn btn-primary m-2">Listado</a>
-                        <a href="venta-formulario.php" class="btn btn-primary m-2">Nuevo</a>
-                        <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar" onclick="guardar();">Guardar</button>
-                        <button type="submit" class="btn btn-danger m-2" id="btnBorrar" name="btnBorrar">Borrar</button>
-                    </div>
-                    <h6 class="alert <?php echo $venta->accion ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
-                </div>
-
-                <?php
-
-                    if (isset($_GET["id"])) {
-                        $venta->idVenta = $_GET["id"];
-                        $venta->obtenerPorId();
-                    }
-
-                ?>
-
                 <form id="formulario" action="" method="POST">
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="ventas-listado.php" class="btn btn-primary m-2">Listado</a>
+                            <a href="venta-formulario.php" class="btn btn-primary m-2">Nuevo</a>
+                            <button type="submit" class="btn btn-success m-2" id="btnGuardar" name="btnGuardar">Guardar</button>
+                            <button type="submit" class="btn btn-danger m-2" id="btnBorrar" name="btnBorrar">Borrar</button>
+                        </div>
+                        <h6 class="alert <?php echo $venta->accion ? "alert-success" : "alert-danger"; ?> ml-3 mt-3 <?php echo isset($msg) ? "" : "d-none"; ?>" role="alert"><?php echo $msg; ?></h6>
+                    </div>
+
+                    <?php
+
+                        if (isset($_GET["id"])) {
+                            $venta->idVenta = $_GET["id"];
+                            $venta->obtenerPorId();
+                        }
+
+                    ?>
+
                     <div class="row mt-3">
                         <div class="col-6 form-group">
                             <label for="txtFecha">Fecha:</label>
@@ -181,17 +186,21 @@
 
                         <div class="col-6 form-group">
                             <label for="txtPrecioUnit">Precio unitario:</label>
-                            <input type="text" required class="form-control" name="txtPrecioUnit" id="txtPrecioUnit" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->precioUnitario, 2, ",", ".") : "0"; ?>">
+                            <input type="hidden" required class="form-control" name="txtPrecioUnit" id="txtPrecioUnit" value="<?php echo isset($_GET["id"]) ? $venta->precioUnitario : "0"; ?>">
+                            <input type="text" required class="form-control" id="txtPrecioUnitV" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->precioUnitario, 2, ",", ".") : ""; ?>">
                         </div>
 
                         <div class="col-6 form-group">
                             <label for="txtCantidad">Cantidad:</label>
+                            <input type="hidden" id="txtStockData" value="">
                             <input onchange="calcularPrecioTotal();" type="number" min="0" required class="form-control" name="txtCantidad" id="txtCantidad" value="<?php echo isset($_GET["id"]) ? $venta->cantidad : "0"; ?>">
+                            <p id="msgAlerta" class="alert-danger text-center" style="display: none;">No hay stock suficiente</p>
                         </div>
 
                         <div class="col-6 form-group">
                             <label for="txtTotal">Total:</label>
-                            <input type="text" required class="form-control" name="txtTotal" id="txtTotal" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->total, 2, ",", ".") : "0"; ?>">
+                            <input type="hidden" required class="form-control" name="txtTotal" id="txtTotal" value="<?php echo isset($_GET["id"]) ? $venta->total : "0"; ?>">
+                            <input type="text" required class="form-control" id="txtTotalV" disabled value="<?php echo isset($_GET["id"]) ? number_format($venta->total, 2, ",", ".") : ""; ?>">
                         </div>
                     </div>
                 </form>
@@ -276,14 +285,26 @@
             async: true,
             dataType: "json",
             success: function(data) {
-                $('#txtPrecioUnit').val(data);
+                $('#txtPrecioUnit').val(parseFloat(data.precio));
+                $('#txtPrecioUnitV').val(Intl.NumberFormat("es-AR", {style: 'currency', currency: 'ARS'}).format(data.precio));
+                $('#txtStockData').val(parseInt(data.stock));
                 calcularPrecioTotal();
             }
         });
     }
 
     function calcularPrecioTotal() {
-        $('#txtTotal').val($('#txtPrecioUnit').val() * $('#txtCantidad').val());
+        cantidad = parseInt($('#txtCantidad').val());
+        stockProducto = parseInt($('#txtStockData').val());
+        if (stockProducto != "") {
+            if (cantidad > stockProducto) {
+                $('#msgAlerta').show();
+            } else {
+                $('#txtTotal').val(cantidad * $('#txtPrecioUnit').val());
+                $('#txtTotalV').val(Intl.NumberFormat("es-AR", {style: 'currency', currency: 'ARS'}).format(cantidad * $('#txtPrecioUnit').val()));
+                $('#msgAlerta').hide();
+            }
+        }
     }
 
 </script>

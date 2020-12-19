@@ -69,12 +69,6 @@
         public function actualizar(){
 
             $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE);
-            
-            /*comprobar que sea un valor numérico*/
-            if (!(strpos($this->precio, ",") === false)) {
-                $this->precio = str_replace(".", "", $this->precio);
-                $this->precio = str_replace(",", ".", $this->precio);
-            }
 
             $sql = "UPDATE productos SET
                     nombre = '".$this->nombre."',
